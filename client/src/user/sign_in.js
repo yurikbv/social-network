@@ -1,4 +1,7 @@
 import React, {Component} from 'react';
+import { Redirect } from 'react-router-dom';
+
+import { signIn, authenticate } from "../auth";
 
 class SignIn extends Component {
 
@@ -6,21 +9,11 @@ class SignIn extends Component {
     email: '',
     password: '',
     error: '',
-    redirectToReferer: false
+    redirectToReferer: false,
+    loading: false
   };
 
-  signIn = (user) => {
-    return fetch('/api/sign_in',{
-      method: 'POST',
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(user)
-    }).then(response => {
-      return response.json();
-    }).catch(err => console.error(err));
-  };
+
 
   handleChange = name => event => {
     this.setState({
@@ -31,19 +24,27 @@ class SignIn extends Component {
 
   handleForm = event => {
     event.preventDefault();
+    this.setState({loading: true});
     const {email,password} = this.state;
     const user = {email,password};
-    this.signIn(user).then(data => {
-      if(data.error) this.setState({error: data.error});
+    signIn(user).then(data => {
+      if(data.error) this.setState({error: data.error, loading: false});
       else {
-
+        authenticate(data, () => {
+          this.setState({redirectToReferer: true});
+        });
       }
     });
   };
 
+
   render() {
 
-    const {password,email,error} = this.state;
+    const {password,email,error,redirectToReferer, loading} = this.state;
+
+    if(redirectToReferer) {
+      return <Redirect to="/"/>
+    }
 
     return (
         <div className="container">
@@ -53,6 +54,12 @@ class SignIn extends Component {
           <div className="alert alert-danger">
             {error}
           </div>}
+
+          {loading &&
+            <div className="jumbotron text-center">
+              <h2>Loading...</h2>
+            </div>
+          }
 
           <form onSubmit={this.handleForm}>
             <div className="form-group">

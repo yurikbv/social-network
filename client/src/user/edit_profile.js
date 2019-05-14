@@ -1,60 +1,68 @@
 import React, {Component} from 'react';
-import {Link} from "react-router-dom";
-import { signUp } from "../auth";
+import { Redirect } from "react-router-dom";
 
-class SignUp extends Component {
+import {read, update} from "./api_user";
+import {isAuthenticated} from "../auth";
+
+class EditProfile extends Component {
 
   state = {
+    id: '',
     name: '',
     email: '',
     password: '',
-    error: '',
-    open: false
+    redirectToProfile: false
+  };
+
+  componentDidMount() {
+    const userId = this.props.match.params.userId;
+    this.init(userId);
+  }
+
+  init = (userId) => {
+    read(userId, isAuthenticated().token).then(data => {
+      if(data.error) this.setState({redirectToProfile: true});
+      else {
+        this.setState({
+          id: data._id,
+          name: data.name,
+          email: data.email
+        })
+      }
+    })
   };
 
   handleChange = name => event => {
     this.setState({
-      [name]: event.target.value,
-      error: ''
+      [name]: event.target.value
     })
   };
 
   handleForm = event => {
     event.preventDefault();
     const {name,email,password} = this.state;
-    const user = {name,email,password};
-    signUp(user).then(data => {
+    const user = {name,email,password: password || undefined};
+    const userId = this.props.match.params.userId;
+    const token = isAuthenticated().token;
+    update(userId, token, user).then(data => {
       if(data.error) this.setState({error: data.error});
-        else {
-          this.setState({
-            name: '',
-            email: '',
-            password: '',
-            error: '',
-            open: true
-          });
-        }
+      else {
+        this.setState({
+          redirectToProfile: true
+        });
+      }
     });
   };
 
   render() {
 
-    const {name,password,email,error,open} = this.state;
+    const {id,name,password,email, redirectToProfile} = this.state;
+
+    if(redirectToProfile) return <Redirect to={`/user/${id}`}/>;
 
     return (
         <div className="container">
-          <h2 className="mt-5 mb-5">Sign up</h2>
-
-          {error &&
-          <div className="alert alert-danger">
-            {error}
-          </div>}
-
-          {open &&
-          <div className="alert alert-info">
-            New account is successfully created. Please <Link to="/sign_in">Sign In</Link>.
-          </div>}
-
+          <h2 className="mt-5 mb-5">Edit Profile</h2>
           <form onSubmit={this.handleForm}>
             <div className="form-group">
               <label className="text-muted">Name</label>
@@ -87,11 +95,11 @@ class SignUp extends Component {
                 className="btn btn-raised btn-primary"
                 onClick={this.handleForm}
                 type="submit"
-            >Sign Up</button>
+            >Update</button>
           </form>
         </div>
     );
   }
 }
 
-export default SignUp;
+export default EditProfile;

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {list} from "./api_user";
 import DefaultImage from '../images/avatar.png';
 
+
 class Users extends Component {
 
   state = {
@@ -11,7 +12,7 @@ class Users extends Component {
 
   componentDidMount() {
     list().then(data => {
-      if (data.error) console.error(data.error);
+      if (data.error) console.log(data.error);
       else this.setState({users: data});
     })
   }
@@ -20,11 +21,12 @@ class Users extends Component {
       <div className="row">
         {users.map((user,i) => (
             <div className="card col-md-4" key={i}>
-              <img className="card-img-top"
-                   src={DefaultImage}
-                   alt={user.name}
-                   style={{width:'100%',height:'15vw',objectFit:'cover'}}
-              />
+              <img
+                  className="img-thumbnail"
+                  src={ `/api/user/photo/${user._id}`}
+                  alt={user.name}
+                  onError={i => (i.target.src = `${DefaultImage}`)}
+                  style={{height: '200px', width: 'auto'}}/>
                 <div className="card-body">
                   <h5 className="card-title">{user.name}</h5>
                   <p className="card-text">{user.email}</p>
@@ -38,6 +40,8 @@ class Users extends Component {
   render() {
 
     const {users} = this.state;
+
+
 
     return (
         <div className="container">

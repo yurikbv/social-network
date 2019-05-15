@@ -23,21 +23,32 @@ const Menu = (props) => (
                 </li>
               </React.Fragment>
             : <React.Fragment>
-              <li className="nav-item">
+
+                <li className="nav-item">
                   <NavLink
                       className="nav-link"
-                      to={`/user/${isAuthenticated().user._id}`}
+                      to={`/find_people`}
                       activeStyle={{color: '#ff9900'}}>
-                    {`${isAuthenticated().user.name}'s profile`}
+                    Find People
                   </NavLink>
                 </li>
+
+              <li className="nav-item">
+                <NavLink
+                    className="nav-link"
+                    to={`/user/${isAuthenticated().user._id}`}
+                    activeStyle={{color: '#ff9900'}}>
+                  {`${isAuthenticated().user.name}'s profile`}
+                </NavLink>
+              </li>
+
                 <li className="nav-item">
-                  <span
-                      className="nav-link"
-                      style={{cursor: 'pointer', boxSizing:'border-box'}}
-                      onClick={() => signOut(() => props.history.push('/'))}
-                  >Sign Out
-                  </span>
+                    <span
+                        className="nav-link"
+                        style={{cursor: 'pointer', boxSizing:'border-box'}}
+                        onClick={() => signOut(() => props.history.push('/'))}
+                    >Sign Out
+                    </span>
                 </li>
               </React.Fragment>
         }

@@ -16,8 +16,9 @@ exports.postById = (req,res,next,id) => {
 exports.getPosts = (req,res) => {
   Post.find()
       .populate('postedBy','_id name')
-      .select("_id title body ")
-      .then(posts => res.json({posts}))
+      .select("_id title body createdAt likes")
+      .sort({createdAt: 'desc'})
+      .then(posts => res.json(posts))
       .catch(err => console.log(err))
 };
 
@@ -45,26 +46,45 @@ exports.createPost = (req, res, next) => {
 exports.postsByUser = (req,res) => {
   Post.find({postedBy: req.profile._id})
       .populate("postedBy","_id name")
+      .select("_id title body createdAt likes")
       .sort('_createdAt')
       .exec((err,posts) => {
         if(err) return res.status(400).json({error: err});
-        res.json({posts});
+        res.json(posts);
       })
 };
 
 exports.isPoster = (req,res,next) => {
-  console.log(req.auth);
   let isPoster = req.post && req.auth && (String(req.post.postedBy._id) === String(req.auth._id));
   if(!isPoster) return res.status(403).json({error:"User is not authorized"});
   next();
 };
 
+// exports.updatePost = (req,res) => {
+//   let post = req.post;
+//   post = _.extend(post,req.body);
+//   post.save((err) => {
+//     if(err) return res.status(400).json({error: err});
+//     res.json(post);
+//   })
+// };
+
 exports.updatePost = (req,res) => {
-  let post = req.post;
-  post = _.extend(post,req.body);
-  post.save((err) => {
-    if(err) return res.status(400).json({error: err});
-    res.json(post);
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.parse(req, (err, fields, files) => {
+    if (err) return res.status(400).json({error: "Photo could not be uploaded"});
+    let post = req.post;
+    post = _.extend(post, fields);
+    if(files.photo) {
+      post.photo.data = fs.readFileSync(files.photo.path);
+      post.photo.contentType = files.photo.type;
+    }
+
+    post.save((err, result) => {
+      if(err) return res.status(400).json({error:err});
+      res.json(post);
+    })
   })
 };
 
@@ -74,4 +94,31 @@ exports.deletePost = (req,res) => {
     if(err) return res.status(400).json({error: err});
     res.json({message: "Post deleted successfully"});
   });
+};
+
+exports.postPhoto = (req,res, next) => {
+  res.set("Content-Type", req.post.photo.contentType);
+  return res.send(req.post.photo.data);
+};
+
+exports.singlePost = (req,res) => {
+  return res.json(req.post);
+};
+
+exports.like = (req,res) => {
+  Post.findByIdAndUpdate(req.body.postId,
+      {$push:{likes: req.body.userId}},
+      {new: true}).exec((err,result) => {
+        if(err) return res.status(400).json({error: err});
+        res.json(result);
+  })
+};
+
+exports.unlike = (req,res) => {
+  Post.findByIdAndUpdate(req.body.postId,
+      {$pull:{likes: req.body.userId}},
+      {new: true}).exec((err,result) => {
+    if(err) return res.status(400).json({error: err});
+    res.json(result);
+  })
 };

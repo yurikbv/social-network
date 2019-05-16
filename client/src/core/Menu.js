@@ -33,6 +33,15 @@ const Menu = (props) => (
                   </NavLink>
                 </li>
 
+                <li className="nav-item">
+                  <NavLink
+                      className="nav-link"
+                      to={`/post/create`}
+                      activeStyle={{color: '#ff9900'}}>
+                    Create Post
+                  </NavLink>
+                </li>
+
               <li className="nav-item">
                 <NavLink
                     className="nav-link"

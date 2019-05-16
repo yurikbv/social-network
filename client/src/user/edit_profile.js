@@ -27,7 +27,8 @@ class EditProfile extends Component {
   }
 
   init = (userId) => {
-    read(userId, isAuthenticated().token).then(data => {
+    const token = isAuthenticated().token;
+    read(userId, token).then(data => {
       if(data.error) this.setState({redirectToProfile: true});
       else {
         this.setState({

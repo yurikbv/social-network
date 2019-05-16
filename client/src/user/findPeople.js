@@ -68,7 +68,7 @@ class FindPeople extends Component {
 
   render() {
 
-    const {users,error,open, followMessage} = this.state;
+    const {users,open, followMessage} = this.state;
 
 
 

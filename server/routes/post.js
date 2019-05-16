@@ -1,19 +1,32 @@
+
 const express = require('express');
 const router = express.Router();
 
 const {createPostValidator} = require('../validator');
 
 //Controller
-const {getPosts,createPost, postsByUser, postById, isPoster, deletePost, updatePost} = require('../contollers/post');
+const {getPosts,createPost, postsByUser, postById, isPoster,
+  deletePost, updatePost, postPhoto, singlePost, like, unlike} = require('../contollers/post');
 const {requireSignIn} = require('../contollers/auth');
 const {userById} = require('../contollers/user');
 
 
+
 router.get('/api/posts', getPosts);
+
+//like unlike
+router.put('/api/post/like', requireSignIn, like);
+router.put('/api/post/unlike', requireSignIn, unlike);
+
+router.put("/api/post/:postId", requireSignIn, isPoster, updatePost);
 router.post('/api/post/new/:userId',requireSignIn, createPost, createPostValidator);
 router.get('/api/posts/by/:userId', requireSignIn, postsByUser);
-router.put('/api/post/:postId', requireSignIn, isPoster, updatePost);
+router.get('/api/post/:postId', singlePost);
 router.delete('/api/post/:postId', requireSignIn, isPoster, deletePost);
+
+//photo
+router.get('/api/post/photo/:postId', postPhoto);
+
 
 //Any route containing :userId, our app first execute userById()
 router.param("userId", userById);

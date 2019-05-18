@@ -6,6 +6,7 @@ const Post = require('../models/post');
 exports.postById = (req,res,next,id) => {
   Post.findById(id)
       .populate("postedBy", "_id name")
+      .populate('comments.postedBy', '_id name ')
       .exec((err,post) => {
         if(err || !post) return res.status(400).json({error: err});
         req.post = post;
@@ -16,6 +17,8 @@ exports.postById = (req,res,next,id) => {
 exports.getPosts = (req,res) => {
   Post.find()
       .populate('postedBy','_id name')
+      .populate('comments', 'text createdAt ')
+      .populate('comments.postedBy', '_id name ')
       .select("_id title body createdAt likes")
       .sort({createdAt: 'desc'})
       .then(posts => res.json(posts))
@@ -121,4 +124,32 @@ exports.unlike = (req,res) => {
     if(err) return res.status(400).json({error: err});
     res.json(result);
   })
+};
+
+exports.comment = (req, res) => {
+  let comment = req.body.comment;
+  comment.postedBy = req.body.userId;
+  Post.findByIdAndUpdate(req.body.postId,
+      {$push:{comments: comment}},
+      {new: true})
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .exec((err,result) => {
+    if(err) return res.status(400).json({error: err});
+    res.json(result);
+  })
+};
+
+exports.uncomment = (req, res) => {
+  let comment = req.body.comment;
+
+  Post.findByIdAndUpdate(req.body.postId,
+      {$pull:{comments: {_id: comment._id}}},
+      {new: true})
+      .populate('comments.postedBy', '_id name')
+      .populate('postedBy', '_id name')
+      .exec((err,result) => {
+        if(err) return res.status(400).json({error: err});
+        res.json(result);
+      })
 };

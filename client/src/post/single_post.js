@@ -1,27 +1,42 @@
 import React, {Component} from 'react';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faThumbsUp} from '@fortawesome/free-solid-svg-icons'
 import { singlePost, removePost, like, unlike } from "./apiPost";
 import DefaultPost from "../images/mountain.jpg";
 import {Link} from "react-router-dom";
 import {isAuthenticated} from "../auth";
+import Comment from "./comment";
 
 class SinglePost extends Component {
 
   state = {
     post: '',
     like: false,
-    likes: 0
+    likes: 0,
+    comments: []
   };
 
   componentDidMount() {
     const postId = this.props.match.params.postId;
     singlePost(postId).then(data => {
       if (data.error) console.log(data.error);
-      else this.setState({post: data, likes: data.likes.length, like: this.checkLike(data.likes) })
+      else {
+        console.log(data);
+        this.setState({
+          post: data,
+          likes: data.likes.length,
+          like: this.checkLike(data.likes) ,
+          comments: data.comments
+      })}
     })
   }
 
+  updateComments = (comments) => {
+    this.setState({comments})
+  };
+
   checkLike = (likes) => {
-    let userId = isAuthenticated().user._id;
+    let userId = isAuthenticated() && isAuthenticated().user._id;
     return  likes.includes(userId);
   };
 
@@ -40,6 +55,9 @@ class SinglePost extends Component {
   };
 
   likeToggle = () => {
+
+    if(!isAuthenticated()) this.props.history.push('/sign_in');
+
     let callApi = this.state.like ? unlike : like;
     const userId = isAuthenticated().user._id;
     const token = isAuthenticated().token;
@@ -67,8 +85,18 @@ class SinglePost extends Component {
               style={{height:'400px',width: '100%', objectFit: 'cover'}}
           />
 
-          <h3 onClick={this.likeToggle}>{likes} Like(s)</h3>
+          {<h3 onClick={this.likeToggle}>
+            {like
+                ? <FontAwesomeIcon icon={faThumbsUp}
+                    className="text-success bg-dark"
+                    style={{padding: '7px', borderRadius:'50%'}}/>
+                : <FontAwesomeIcon icon={faThumbsUp}
+                    className="text-warning bg-dark"
+                    style={{padding: '7px', borderRadius:'50%'}}/>}
 
+                {likes} Like(s)
+          </h3>
+          }
           <p className="card-text">{post.body}</p>
           <br/>
           <p className="font-italic mark">
@@ -91,7 +119,7 @@ class SinglePost extends Component {
 
   render() {
 
-    const {post} = this.state;
+    const {post, comments} = this.state;
     return (
         <div className="container">
           <h2 className="display-2 mt-5 mb-5">{post.title}</h2>
@@ -101,6 +129,8 @@ class SinglePost extends Component {
               </div>
               : this.renderPost(post)
           }
+
+          <Comment postId={post._id} comments={comments.reverse()} updateComments={this.updateComments}/>
         </div>
     );
   }

@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from "react-router-dom";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import {faThumbsUp} from '@fortawesome/free-solid-svg-icons'
 import MainRouter from "./MainRouter";
 
 const App = () => {
@@ -9,5 +11,7 @@ const App = () => {
       </BrowserRouter>
   );
 };
+
+library.add(faThumbsUp);
 
 export default App;

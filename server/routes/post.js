@@ -6,7 +6,7 @@ const {createPostValidator} = require('../validator');
 
 //Controller
 const {getPosts,createPost, postsByUser, postById, isPoster,
-  deletePost, updatePost, postPhoto, singlePost, like, unlike} = require('../contollers/post');
+  deletePost, updatePost, postPhoto, singlePost, like, unlike, comment, uncomment} = require('../contollers/post');
 const {requireSignIn} = require('../contollers/auth');
 const {userById} = require('../contollers/user');
 
@@ -17,6 +17,10 @@ router.get('/api/posts', getPosts);
 //like unlike
 router.put('/api/post/like', requireSignIn, like);
 router.put('/api/post/unlike', requireSignIn, unlike);
+
+//comments
+router.put('/api/post/comment', requireSignIn, comment);
+router.put('/api/post/uncomment', requireSignIn, uncomment);
 
 router.put("/api/post/:postId", requireSignIn, isPoster, updatePost);
 router.post('/api/post/new/:userId',requireSignIn, createPost, createPostValidator);

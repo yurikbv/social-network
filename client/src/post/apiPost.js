@@ -93,3 +93,31 @@ export const unlike = (userId, token, postId) => {
       .then(response => response.json())
       .catch(err => console.error(err));
 };
+
+export const comment = (userId, token, postId, comment) => {
+  return fetch(`/api/post/comment`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      "Content-Type": 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({userId,postId,comment})
+  })
+      .then(response => response.json())
+      .catch(err => console.error(err));
+};
+
+export const uncomment = (userId, token, postId, comment) => {
+  return fetch(`/api/post/uncomment`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      "Content-Type": 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({userId,postId,comment})
+  })
+      .then(response => response.json())
+      .catch(err => console.error(err));
+};

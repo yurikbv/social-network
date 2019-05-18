@@ -29,7 +29,11 @@ const userSchema = mongoose.Schema({
     trim: true
   },
   following: [{type: ObjectId, ref: "User"}],
-  followers: [{type: ObjectId, ref: "User"}]
+  followers: [{type: ObjectId, ref: "User"}],
+  resetPasswordLink: {
+    data: String,
+    default: ""
+  }
 }, {timestamps: true});
 
 //virtual field
